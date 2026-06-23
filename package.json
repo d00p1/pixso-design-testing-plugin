@@ -1,23 +1,21 @@
 {
   "name": "pixso-design-testing-plugin",
   "version": "0.1.0",
+  "private": true,
   "description": "Export Pixso designs as test artifacts for Playwright visual testing",
-  "main": "dist/main.js",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc --watch",
+    "build": "plugin-cli build",
+    "dev": "plugin-cli dev",
+    "pkg": "plugin-cli pkg",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint src/",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {},
   "devDependencies": {
-    "@pixso/plugin-typings": "^2.0.2",
+    "@pixso/plugin-typings": "latest",
+    "@pixso/plugin-cli": "latest",
     "typescript": "^5.5.0",
-    "vitest": "^2.0.0",
-    "eslint": "^9.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0"
+    "vitest": "^2.0.0"
   }
 }
