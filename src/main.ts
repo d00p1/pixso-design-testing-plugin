@@ -7,6 +7,7 @@ import { ExportDesignArtifactUseCase } from './application/export-design-artifac
 import { GenerateMetadataUseCase } from './application/generate-metadata.usecase';
 import { CreateVersionUseCase } from './application/create-version.usecase';
 import { DesignTestMappingRepository } from './infrastructure/mapping/design-test-mapping.repository';
+import { createZip } from './shared/archive';
 
 const nodeReader = new PixsoNodeAdapter();
 const imageExporter = new PixsoImageExporter();
@@ -78,12 +79,24 @@ async function handleExport(params: {
   });
 
   if (result.ok) {
-    const base64 = pixso.base64Encode(result.value.pngData);
+    const { artifact, pngData } = result.value;
+    const versions = await storage.getVersions(artifact.designId);
+    const changelog = JSON.stringify(versions.map((v) => v.toJSON()), null, 2);
+    const metaJson = JSON.stringify(artifact.toJSON(), null, 2);
+
+    const zipName = `${artifact.designId}-v${artifact.version}.zip`;
+    const zipData = createZip({
+      'reference.png': pngData,
+      'meta.json': metaJson,
+      'changelog.json': changelog,
+    });
+
     pixso.ui.postMessage({
       type: 'export-complete',
       payload: {
-        artifact: result.value.artifact.toJSON(),
-        pngBase64: base64,
+        artifact: artifact.toJSON(),
+        zipBase64: pixso.base64Encode(zipData),
+        zipName,
       },
     });
   } else {

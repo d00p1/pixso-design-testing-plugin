@@ -72,9 +72,25 @@ function handleSelectionUpdate(node: typeof selectedNode) {
   }
 }
 
-function handleExportComplete(payload: { artifact: { version: number } }) {
-  showToast(`v${payload.artifact.version} exported successfully`);
+function handleExportComplete(payload: { artifact: { version: number; designId: string }; zipBase64: string; zipName: string }) {
+  showToast(`v${payload.artifact.version} exported — downloading…`);
   $exportDialog.classList.remove('open');
+
+  const binary = atob(payload.zipBase64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  const blob = new Blob([bytes], { type: 'application/zip' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = payload.zipName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function handleVersionsResponse(versions: Array<{ version: number; createdAt: string; comment?: string }>) {

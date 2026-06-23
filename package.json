@@ -11,10 +11,12 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "fflate": "^0.8.3"
+  },
   "devDependencies": {
-    "@pixso/plugin-typings": "latest",
     "@pixso/plugin-cli": "latest",
+    "@pixso/plugin-typings": "latest",
     "typescript": "^5.5.0",
     "vitest": "^2.0.0"
   }
