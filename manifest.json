@@ -6,6 +6,6 @@
   "ui": "dist/ui.html",
   "capabilities": [],
   "enableProposedApi": false,
-  "editorType": ["dev"],
+  "editorType": ["dev", "pixso"],
   "documentAccess": "dynamic-page"
 }
