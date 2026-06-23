@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design Testing Export</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 12px;
+      color: #333;
+      background: #fff;
+      padding: 16px;
+    }
+    h2 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #111;
+    }
+    h3 {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    .section {
+      margin-bottom: 16px;
+      padding: 12px;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      font-size: 11px;
+    }
+    .info-label {
+      color: #888;
+    }
+    .info-value {
+      color: #333;
+      font-weight: 500;
+    }
+    .no-selection {
+      color: #999;
+      font-style: italic;
+      text-align: center;
+      padding: 12px 0;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-primary {
+      background: #7C2FFF;
+      color: #fff;
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+    .btn-primary:hover {
+      background: #6a1fe8;
+    }
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+    .btn-secondary:hover {
+      background: #e5e5e5;
+    }
+    .btn-small {
+      padding: 3px 8px;
+      font-size: 10px;
+    }
+    .form-group {
+      margin-bottom: 8px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 3px;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 5px 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 11px;
+      outline: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #7C2FFF;
+    }
+    .dialog-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 10;
+      align-items: center;
+      justify-content: center;
+    }
+    .dialog-overlay.open {
+      display: flex;
+    }
+    .dialog {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      width: 300px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    .dialog-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .version-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .version-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 11px;
+    }
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 11px;
+      display: none;
+      z-index: 20;
+    }
+    .toast.show {
+      display: block;
+    }
+    .toast-success {
+      background: #e6f9ed;
+      color: #116932;
+      border: 1px solid #b7ebc9;
+    }
+    .toast-error {
+      background: #ffeaea;
+      color: #991b1b;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h2>Design Testing Export</h2>
+
+    <div class="section" id="selection-section">
+      <h3>Selected Node</h3>
+      <div id="selection-info" class="no-selection">
+        Select a Frame or Component in Pixso
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="export-btn" disabled>
+      Export for Playwright
+    </button>
+
+    <button class="btn btn-secondary" id="history-btn" style="width:100%;margin-top:8px;display:none;">
+      Open History
+    </button>
+
+    <div class="dialog-overlay" id="export-dialog">
+      <div class="dialog">
+        <h2>Export Artifact</h2>
+        <div class="form-group">
+          <label>Design ID</label>
+          <input type="text" id="field-design-id" placeholder="e.g. product-card">
+        </div>
+        <div class="form-group">
+          <label>Version Comment</label>
+          <input type="text" id="field-comment" placeholder="e.g. Updated spacing">
+        </div>
+        <div class="form-group">
+          <label>Scale</label>
+          <select id="field-scale">
+            <option value="1">1x</option>
+            <option value="2" selected>2x</option>
+            <option value="3">3x</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tags (comma separated)</label>
+          <input type="text" id="field-tags" placeholder="e.g. catalog, card">
+        </div>
+        <div class="form-group">
+          <label>Related Test (path)</label>
+          <input type="text" id="field-test-id" placeholder="e.g. catalog/product-card.spec.ts">
+        </div>
+        <div class="dialog-buttons">
+          <button class="btn btn-primary" id="confirm-export-btn" style="flex:1">Export</button>
+          <button class="btn btn-secondary" id="cancel-export-btn" style="flex:1">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-overlay" id="history-dialog">
+      <div class="dialog">
+        <h2>Version History</h2>
+        <div id="history-content" class="version-list">
+          <div class="no-selection">Select a node and export first</div>
+        </div>
+        <div class="dialog-buttons">
+          <button class="btn btn-secondary" id="close-history-btn" style="flex:1">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script>
+    let selectedNode = null;
+    let currentDesignId = '';
+
+    const $selInfo = document.getElementById('selection-info');
+    const $exportBtn = document.getElementById('export-btn');
+    const $historyBtn = document.getElementById('history-btn');
+    const $exportDialog = document.getElementById('export-dialog');
+    const $historyDialog = document.getElementById('history-dialog');
+    const $toast = document.getElementById('toast');
+
+    window.addEventListener('message', (event) => {
+      const msg = event.data.pluginMessage || event.data;
+      switch (msg.type) {
+        case 'selection-update':
+          handleSelectionUpdate(msg.payload);
+          break;
+        case 'export-started':
+          showToast('Exporting...');
+          break;
+        case 'export-complete':
+          handleExportComplete(msg.payload);
+          break;
+        case 'export-error':
+          showToast(msg.payload, 'error');
+          break;
+        case 'versions-response':
+          handleVersionsResponse(msg.payload);
+          break;
+        case 'mapping-saved':
+          showToast('Mapping saved');
+          break;
+      }
+    });
+
+    function handleSelectionUpdate(node) {
+      selectedNode = node;
+      if (node) {
+        currentDesignId = slugify(node.name);
+        $selInfo.innerHTML = `
+          <div class="info-row"><span class="info-label">Name</span><span class="info-value">${esc(node.name)}</span></div>
+          <div class="info-row"><span class="info-label">Type</span><span class="info-value">${esc(node.type)}</span></div>
+          <div class="info-row"><span class="info-label">Width</span><span class="info-value">${node.width}</span></div>
+          <div class="info-row"><span class="info-label">Height</span><span class="info-value">${node.height}</span></div>
+          <div class="info-row"><span class="info-label">Page</span><span class="info-value">${esc(node.pageName)}</span></div>
+          <div class="info-row"><span class="info-label">Design ID</span><span class="info-value">${esc(currentDesignId)}</span></div>
+        `;
+        $exportBtn.disabled = false;
+        $historyBtn.style.display = '';
+      } else {
+        $selInfo.innerHTML = '<div class="no-selection">Select a Frame or Component in Pixso</div>';
+        $exportBtn.disabled = true;
+        $historyBtn.style.display = 'none';
+      }
+    }
+
+    function handleExportComplete(payload) {
+      showToast(`v${payload.artifact.version} exported successfully`);
+      $exportDialog.classList.remove('open');
+    }
+
+    function handleVersionsResponse(versions) {
+      const $content = document.getElementById('history-content');
+      if (versions.length === 0) {
+        $content.innerHTML = '<div class="no-selection">No versions yet</div>';
+        return;
+      }
+      $content.innerHTML = versions.map(v => `
+        <div class="version-item">
+          <span>v${v.version}</span>
+          <span style="color:#888">${new Date(v.createdAt).toLocaleDateString()}</span>
+          ${v.comment ? `<span style="color:#666;font-size:10px">${esc(v.comment)}</span>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function showToast(message, type) {
+      $toast.textContent = message + (type === 'error' ? '' : '');
+      $toast.className = 'toast ' + (type === 'error' ? 'toast-error' : 'toast-success') + ' show';
+      setTimeout(() => { $toast.classList.remove('show'); }, 3000);
+    }
+
+    function slugify(text) {
+      return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
+
+    function esc(text) {
+      return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    $exportBtn.addEventListener('click', () => {
+      document.getElementById('field-design-id').value = currentDesignId;
+      $exportDialog.classList.add('open');
+    });
+
+    document.getElementById('cancel-export-btn').addEventListener('click', () => {
+      $exportDialog.classList.remove('open');
+    });
+
+    document.getElementById('confirm-export-btn').addEventListener('click', () => {
+      if (!selectedNode) return;
+      const designId = document.getElementById('field-design-id').value.trim();
+      if (!designId) { showToast('Design ID is required', 'error'); return; }
+
+      const tagsStr = document.getElementById('field-tags').value.trim();
+      const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+      parent.postMessage({
+        pluginMessage: {
+          type: 'export',
+          payload: {
+            nodeId: selectedNode.id,
+            designId,
+            scale: parseInt(document.getElementById('field-scale').value),
+            comment: document.getElementById('field-comment').value.trim() || undefined,
+            tags: tags.length > 0 ? tags : undefined,
+            testId: document.getElementById('field-test-id').value.trim() || undefined,
+          }
+        }
+      }, '*');
+    });
+
+    $historyBtn.addEventListener('click', () => {
+      if (!currentDesignId) return;
+      $historyDialog.classList.add('open');
+      parent.postMessage({
+        pluginMessage: {
+          type: 'get-versions',
+          payload: { designId: currentDesignId }
+        }
+      }, '*');
+    });
+
+    document.getElementById('close-history-btn').addEventListener('click', () => {
+      $historyDialog.classList.remove('open');
+    });
+
+    parent.postMessage({ pluginMessage: { type: 'get-selection' } }, '*');
+  </script>
+</body>
+</html>
