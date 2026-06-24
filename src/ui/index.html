@@ -43,6 +43,29 @@
         </select>
       </div>
       <div class="form-group">
+        <label>Export format</label>
+        <select id="field-format">
+          <option value="PNG" selected>PNG (image)</option>
+          <option value="PNG+SVG">PNG + SVG</option>
+        </select>
+      </div>
+      <div class="form-group" id="svg-options-group" style="display:none">
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px">
+          <input type="checkbox" id="field-svg-outline-text" checked>
+          Outline text (text as &lt;text&gt;)
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px">
+          <input type="checkbox" id="field-svg-id-attribute" checked>
+          Include layer IDs
+        </label>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:6px">
+          <input type="checkbox" id="field-design-properties" checked>
+          Include design properties (design.json)
+        </label>
+      </div>
+      <div class="form-group">
         <label>Tags (comma separated)</label>
         <input type="text" id="field-tags" placeholder="e.g. catalog, card">
       </div>

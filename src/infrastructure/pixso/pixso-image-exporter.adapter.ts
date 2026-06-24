@@ -21,12 +21,22 @@ export class PixsoImageExporter implements ImageExporterPort {
 
     const format = options?.format ?? 'PNG';
 
-    return (pixsoNode as unknown as { exportAsync(settings: Record<string, unknown>): Promise<Uint8Array> }).exportAsync({
+    const settings: Record<string, unknown> = {
       format,
       contentsOnly: options?.contentsOnly ?? true,
-      ...(options?.scale
-        ? { constraint: { type: 'SCALE', value: options.scale } }
-        : {}),
-    });
+    };
+
+    if (format === 'SVG') {
+      if (options?.svgOutlineText !== undefined) {
+        settings.svgOutlineText = options.svgOutlineText;
+      }
+      if (options?.svgIdAttribute !== undefined) {
+        settings.svgIdAttribute = options.svgIdAttribute;
+      }
+    } else if (options?.scale) {
+      settings.constraint = { type: 'SCALE', value: options.scale };
+    }
+
+    return (pixsoNode as unknown as { exportAsync(settings: Record<string, unknown>): Promise<Uint8Array> }).exportAsync(settings);
   }
 }

@@ -1,6 +1,7 @@
 import { PixsoNodeAdapter } from './infrastructure/pixso/pixso-node.adapter';
 import { PixsoImageExporter } from './infrastructure/pixso/pixso-image-exporter.adapter';
 import { PixsoMetadataExtractor } from './infrastructure/pixso/pixso-metadata-extractor.adapter';
+import { PixsoDesignPropertiesExtractor } from './infrastructure/pixso/pixso-design-properties-extractor.adapter';
 import { LocalStorageRepository } from './infrastructure/storage/local-storage.repository';
 import { VersionService } from './domain/services/version.service';
 import { ExportDesignArtifactUseCase } from './application/export-design-artifact.usecase';
@@ -16,6 +17,7 @@ const versionService = new VersionService(storage);
 const mappingRepo = new DesignTestMappingRepository(storage);
 
 const metadataExtractor = new PixsoMetadataExtractor('', '');
+const propertiesExtractor = new PixsoDesignPropertiesExtractor();
 
 const exportUseCase = new ExportDesignArtifactUseCase(
   nodeReader,
@@ -23,6 +25,7 @@ const exportUseCase = new ExportDesignArtifactUseCase(
   metadataExtractor,
   storage,
   versionService,
+  propertiesExtractor,
 );
 
 const generateMetaUseCase = new GenerateMetadataUseCase(
@@ -34,7 +37,7 @@ const createVersionUseCase = new CreateVersionUseCase(versionService);
 
 pixso.showUI(__html__, {
   width: 340,
-  height: 520,
+  height: 580,
   title: 'Design Testing Export',
 });
 
@@ -66,30 +69,51 @@ async function handleExport(params: {
   comment?: string;
   tags?: string[];
   testId?: string;
+  includeSvg?: boolean;
+  svgOutlineText?: boolean;
+  svgIdAttribute?: boolean;
+  includeDesignProperties?: boolean;
 }) {
   pixso.ui.postMessage({ type: 'export-started' });
 
   const result = await exportUseCase.execute({
     nodeId: params.nodeId,
     designId: params.designId,
-    exportOptions: { scale: params.scale ?? 2, format: 'PNG' },
+    exportOptions: {
+      scale: params.scale ?? 2,
+      format: 'PNG',
+      includeSvg: params.includeSvg,
+      svgOutlineText: params.svgOutlineText,
+      svgIdAttribute: params.svgIdAttribute,
+      includeDesignProperties: params.includeDesignProperties ?? true,
+    },
     comment: params.comment,
     tags: params.tags,
     testId: params.testId,
   });
 
   if (result.ok) {
-    const { artifact, pngData } = result.value;
+    const { artifact, pngData, svgData, designProperties } = result.value;
     const versions = await storage.getVersions(artifact.designId);
     const changelog = JSON.stringify(versions.map((v) => v.toJSON()), null, 2);
     const metaJson = JSON.stringify(artifact.toJSON(), null, 2);
 
-    const zipName = `${artifact.designId}-v${artifact.version}.zip`;
-    const zipData = createZip({
+    const zipFiles: Record<string, Uint8Array | string> = {
       'reference.png': pngData,
       'meta.json': metaJson,
       'changelog.json': changelog,
-    });
+    };
+
+    if (svgData) {
+      zipFiles['reference.svg'] = svgData;
+    }
+
+    if (designProperties) {
+      zipFiles['design.json'] = JSON.stringify(designProperties, null, 2);
+    }
+
+    const zipName = `${artifact.designId}-v${artifact.version}.zip`;
+    const zipData = createZip(zipFiles);
 
     pixso.ui.postMessage({
       type: 'export-complete',
@@ -144,6 +168,10 @@ pixso.ui.onmessage = async (msg: {
         comment?: string;
         tags?: string[];
         testId?: string;
+        includeSvg?: boolean;
+        svgOutlineText?: boolean;
+        svgIdAttribute?: boolean;
+        includeDesignProperties?: boolean;
       });
       break;
     case 'get-versions':

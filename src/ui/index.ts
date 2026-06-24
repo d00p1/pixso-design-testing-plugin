@@ -20,12 +20,22 @@ const $toast = document.getElementById('toast')!;
 const $fieldDesignId = document.getElementById('field-design-id') as HTMLInputElement;
 const $fieldComment = document.getElementById('field-comment') as HTMLInputElement;
 const $fieldScale = document.getElementById('field-scale') as HTMLSelectElement;
+const $fieldFormat = document.getElementById('field-format') as HTMLSelectElement;
+const $svgOptionsGroup = document.getElementById('svg-options-group')!;
+const $fieldSvgOutlineText = document.getElementById('field-svg-outline-text') as HTMLInputElement;
+const $fieldSvgIdAttribute = document.getElementById('field-svg-id-attribute') as HTMLInputElement;
+const $fieldDesignProperties = document.getElementById('field-design-properties') as HTMLInputElement;
 const $fieldTags = document.getElementById('field-tags') as HTMLInputElement;
 const $fieldTestId = document.getElementById('field-test-id') as HTMLInputElement;
 const $confirmExportBtn = document.getElementById('confirm-export-btn')!;
 const $cancelExportBtn = document.getElementById('cancel-export-btn')!;
 const $closeHistoryBtn = document.getElementById('close-history-btn')!;
 const $historyContent = document.getElementById('history-content')!;
+
+$fieldFormat.addEventListener('change', () => {
+  $svgOptionsGroup.style.display =
+    $fieldFormat.value === 'PNG+SVG' ? '' : 'none';
+});
 
 window.addEventListener('message', (event) => {
   const msg = event.data.pluginMessage || event.data;
@@ -135,6 +145,8 @@ function esc(text: string): string {
 $exportBtn.addEventListener('click', () => {
   $fieldDesignId.value = currentDesignId;
   $exportDialog.classList.add('open');
+  $svgOptionsGroup.style.display =
+    $fieldFormat.value === 'PNG+SVG' ? '' : 'none';
 });
 
 $cancelExportBtn.addEventListener('click', () => {
@@ -152,6 +164,8 @@ $confirmExportBtn.addEventListener('click', () => {
   const tagsStr = $fieldTags.value.trim();
   const tags = tagsStr ? tagsStr.split(',').map((t) => t.trim()).filter(Boolean) : [];
 
+  const includeSvg = $fieldFormat.value === 'PNG+SVG';
+
   parent.postMessage(
     {
       pluginMessage: {
@@ -163,6 +177,10 @@ $confirmExportBtn.addEventListener('click', () => {
           comment: $fieldComment.value.trim() || undefined,
           tags: tags.length > 0 ? tags : undefined,
           testId: $fieldTestId.value.trim() || undefined,
+          includeSvg,
+          svgOutlineText: includeSvg ? $fieldSvgOutlineText.checked : undefined,
+          svgIdAttribute: includeSvg ? $fieldSvgIdAttribute.checked : undefined,
+          includeDesignProperties: $fieldDesignProperties.checked,
         },
       },
     },

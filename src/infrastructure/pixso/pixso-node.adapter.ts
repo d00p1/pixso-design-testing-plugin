@@ -12,8 +12,8 @@ export class PixsoNodeAdapter implements NodeReaderPort {
 
   async getNodeById(id: string): Promise<Node | null> {
     const node = pixso.getNodeById(id);
-    if (!node) return null;
-    return this.mapNode(node);
+    if (!node || node.type === 'DOCUMENT' || node.type === 'PAGE') return null;
+    return this.mapNode(node as SceneNode);
   }
 
   async getCurrentPageName(): Promise<string> {

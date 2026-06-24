@@ -4,6 +4,10 @@ export interface ExportOptions {
   scale?: number;
   format?: 'PNG' | 'JPG' | 'SVG' | 'PDF';
   contentsOnly?: boolean;
+  svgOutlineText?: boolean;
+  svgIdAttribute?: boolean;
+  includeSvg?: boolean;
+  includeDesignProperties?: boolean;
 }
 
 export interface ImageExporterPort {

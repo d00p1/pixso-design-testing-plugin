@@ -1,11 +1,8 @@
 {
   "name": "Design Testing Export",
   "id": "pixso-design-testing-plugin",
-  "api": "2.0.0",
+  "version": "1.0.0",
   "main": "dist/main.js",
   "ui": "dist/ui.html",
-  "capabilities": [],
-  "enableProposedApi": false,
-  "editorType": ["dev", "pixso"],
-  "documentAccess": "dynamic-page"
+  "editorType ": ["dev", "pixso"]
 }
