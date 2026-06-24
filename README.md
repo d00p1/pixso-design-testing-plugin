@@ -63,6 +63,20 @@ npm run typecheck  # TypeScript check
 npm run pkg        # Package into .zip for distribution
 ```
 
+## Release
+
+Releases are automated via GitHub Actions. To publish a new version:
+
+```bash
+npm version patch  # or minor, major
+git push --follow-tags
+```
+
+The CI workflow will:
+1. Install dependencies, run typecheck and tests
+2. Build the plugin and package it into a `.zip`
+3. Create a GitHub Release with the `.zip` artifact attached
+
 ## Export format
 
 ### `design.json` — Design properties

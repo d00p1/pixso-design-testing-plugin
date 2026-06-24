@@ -1,0 +1,43 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      - run: npm test
+
+      - run: npm run build
+
+      - run: npm run pkg
+
+      - name: Find package artifact
+        id: artifact
+        run: |
+          ZIP=$(ls *.zip | head -1)
+          echo "file=${ZIP}" >> $GITHUB_OUTPUT
+          echo "name=${ZIP%.zip}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          files: ${{ steps.artifact.outputs.file }}
+          generate_release_notes: true
